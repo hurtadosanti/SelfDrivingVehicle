@@ -130,7 +130,7 @@ class TLDetector(object):
         #
         # cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
 
-        # TODO(cfezequiel): Use classifier once ready.
+        # TODO(cfezequiel): Enable classifier once ready.
         #Get classification
         #return self.light_classifier.get_classification(cv_image)
         return light.state
