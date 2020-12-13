@@ -38,8 +38,8 @@ class DBWNode(object):
         vehicle_mass = rospy.get_param('~vehicle_mass', 1736.35)
         fuel_capacity = rospy.get_param('~fuel_capacity', 13.5)
         brake_deadband = rospy.get_param('~brake_deadband', .1)
-        decel_limit = rospy.get_param('~decel_limit', -5)
-        accel_limit = rospy.get_param('~accel_limit', 1.)
+        deceleration_limit = rospy.get_param('~decel_limit', -5)
+        acceleration_limit = rospy.get_param('~accel_limit', 1.)
         wheel_radius = rospy.get_param('~wheel_radius', 0.2413)
         wheel_base = rospy.get_param('~wheel_base', 2.8498)
         steer_ratio = rospy.get_param('~steer_ratio', 14.8)
@@ -53,9 +53,11 @@ class DBWNode(object):
         self.brake_pub = rospy.Publisher('/vehicle/brake_cmd',
                                          BrakeCmd, queue_size=1)
 
+        min_speed = 0.1
+
         # Create `Controller` object
-        self.controller = Controller(vehicle_mass=vehicle_mass,
-                                    wheel_radius=wheel_radius)
+        self.controller = Controller(vehicle_mass, fuel_capacity, brake_deadband, deceleration_limit,
+                 acceleration_limit, wheel_radius, wheel_base, steer_ratio, min_speed, max_lat_accel, max_steer_angle)
 
         # Subscribe to all the topics you need to
         rospy.Subscriber('/current_velocity', TwistStamped, self.current_velocity_cb)
@@ -75,7 +77,7 @@ class DBWNode(object):
     def loop(self):
         rate = rospy.Rate(50) # 50Hz
         while not rospy.is_shutdown():
-            # TODO: Get predicted throttle, brake, and steering using `twist_controller`
+            # Get predicted throttle, brake, and steering using `twist_controller`
             # You should only publish the control commands if dbw is enabled
             # throttle, brake, steering = self.controller.control(<proposed linear velocity>,
             #                                                     <proposed angular velocity>,
