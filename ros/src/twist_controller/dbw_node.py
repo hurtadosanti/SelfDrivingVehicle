@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 import rospy
 from std_msgs.msg import Bool
 from dbw_mkz_msgs.msg import ThrottleCmd, SteeringCmd, BrakeCmd, SteeringReport
@@ -71,10 +70,11 @@ class DBWNode(object):
         self.angular_vel = None
 
         self.throttle = self.steering = self.brake = 0
-
+        rospy.loginfo("Init ready")
         self.loop()
 
     def loop(self):
+        rospy.loginfo("Looping")
         rate = rospy.Rate(50) # 50Hz
         while not rospy.is_shutdown():
             # Get predicted throttle, brake, and steering using `twist_controller`
@@ -93,21 +93,24 @@ class DBWNode(object):
                                                                                     self.angular_vel)
             if self.dbw_enabled:
                 self.publish(self.throttle, self.brake,self.steering)
-            
+            rospy.loginfo('sleep looping')
             rate.sleep()
     
     def dbw_enabled_cb(self,msg):
-        rospy.loginfo('dbw_enabled_cb',msg)
+        rospy.loginfo('dbw_enabled_cb')
         self.dbw_enabled = msg
     
     def twist_cmd_cb(self,msg):
         self.linear_vel = msg.twist.linear.x
         self.angular_vel = msg.twist.angular.z
+        rospy.loginfo('twist_cmd_cb: '+str(self.linear_vel)+' - '+str(self.angular_vel))
 
     def current_velocity_cb(self,msg):
+        rospy.loginfo('current_velocity_cb')
         self.current_vel = msg.twist.linear.x
 
     def publish(self, throttle, brake, steer):
+        rospy.loginfo('publish')
         tcmd = ThrottleCmd()
         tcmd.enable = True
         tcmd.pedal_cmd_type = ThrottleCmd.CMD_PERCENT

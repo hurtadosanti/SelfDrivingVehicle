@@ -20,7 +20,7 @@ class Controller(object):
         ki = 0.1
         kd = 0.0
         minimum_throttle = 0.0
-        maximum_throttle = 0.2
+        maximum_throttle = 0.5
 
         self.throttle_controller = PID(kp, ki, kd, minimum_throttle, maximum_throttle)
 
@@ -39,7 +39,6 @@ class Controller(object):
         self.last_time = rospy.get_time()
 
     def control(self, current_vel, dbw_enable, linear_vel, angular_vel):
-        # TODO: Change the arg, kwarg list to suit your needs
         # Return throttle, brake, steer
         if not dbw_enable:
             self.throttle_controller.reset()
