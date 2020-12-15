@@ -17,7 +17,8 @@ STATE_COUNT_THRESHOLD = 3
 
 class TLDetector(object):
     def __init__(self):
-        rospy.init_node('tl_detector')
+        rospy.init_node('tl_detector', log_level=rospy.DEBUG)
+        rospy.logdebug('__init__')
 
         self.pose = None
         self.waypoints = None
@@ -56,6 +57,7 @@ class TLDetector(object):
         rospy.spin()
 
     def pose_cb(self, msg):
+        rospy.logdebug('pose_cb')
         self.pose = msg
 
     def waypoints_cb(self, waypoints):
@@ -68,6 +70,7 @@ class TLDetector(object):
 
 
     def traffic_cb(self, msg):
+        rospy.logdebug('traffic_cb')
         self.lights = msg.lights
 
     def image_cb(self, msg):
@@ -78,6 +81,7 @@ class TLDetector(object):
             msg (Image): image from car-mounted camera
 
         """
+        rospy.logdebug('image_cb')
         self.has_image = True
         self.camera_image = msg
         light_wp, state = self.process_traffic_lights()
@@ -111,6 +115,7 @@ class TLDetector(object):
             int: index of the closest waypoint in self.waypoints
 
         """
+        rospy.logdebug('get_closest_waypoint')
         closest_idx = self.waypoint_tree.query([x, y], 1)[1]
         return closest_idx
 
@@ -133,6 +138,7 @@ class TLDetector(object):
         # TODO(cfezequiel): Enable classifier once ready.
         #Get classification
         #return self.light_classifier.get_classification(cv_image)
+        rospy.logdebug('get_light_state')
         return light.state
 
     def process_traffic_lights(self):
@@ -145,6 +151,7 @@ class TLDetector(object):
         """
         # Store closest traffic light
         # Each traffic light comes with a line
+        rospy.logdebug('process_traffic_lights')
         closest_light = None
         line_wp_idx = None
 
@@ -171,7 +178,7 @@ class TLDetector(object):
         if closest_light:
             state = self.get_light_state(closest_light)
             return line_wp_idx, state
-        self.waypoints = None
+        # self.waypoints = None
         # Note
         # TrafficLight.UNKNOWN -> keep the car moving for now
         return -1, TrafficLight.UNKNOWN
