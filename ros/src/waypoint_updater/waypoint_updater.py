@@ -28,11 +28,11 @@ MAX_DECEL = 1.0
 
 class WaypointUpdater(object):
     def __init__(self):
-        rospy.init_node('waypoint_updater',log_level=rospy.DEBUG)
+        rospy.init_node('waypoint_updater')
 
         rospy.Subscriber('/current_pose', PoseStamped, self.pose_cb)
         rospy.Subscriber('/base_waypoints', Lane, self.waypoints_cb)
-        rospy.Subscriber('/traffic_waypoint', Int32, self.waypoints_cb)
+        rospy.Subscriber('/traffic_waypoint', Int32, self.traffic_cb)
         self.final_waypoints_pub = rospy.Publisher('final_waypoints', Lane, queue_size=1)
 
         # Add other member variables you need below
@@ -82,6 +82,7 @@ class WaypointUpdater(object):
         lane = Lane()
         closest_idx = self.get_closest_waypoint_idx()
         farthest_idx = closest_idx + LOOKAHEAD_WPS
+        rospy.logdebug(type(self.base_waypoints))
         base_waypoints = self.base_waypoints.waypoints[closest_idx:farthest_idx]
         if self.stopline_wp_idx == -1 or (self.stopline_wp_idx>=farthest_idx):
             lane.waypoints = base_waypoints
@@ -109,7 +110,7 @@ class WaypointUpdater(object):
         pass
 
     def waypoints_cb(self, waypoints):
-        rospy.loginfo('start waypoints_cb')
+        rospy.logdebug('start waypoints_cb'+str(type(waypoints)))
         self.base_waypoints = waypoints
         if not self.waypoints_2d:
             self.waypoints_2d = [[waypoint.pose.pose.position.x, waypoint.pose.pose.position.y] for waypoint in waypoints.waypoints]
@@ -117,6 +118,7 @@ class WaypointUpdater(object):
         rospy.loginfo('end waypoints_cb')
 
     def traffic_cb(self, msg):
+        rospy.logdebug('traffic_cb'+str(msg.data))
         # Callback for /traffic_waypoint message. Implemented
         self.stopline_wp_idx = msg.data
 
