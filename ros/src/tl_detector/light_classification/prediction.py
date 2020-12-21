@@ -10,6 +10,7 @@ import tensorflow as tf
 TRAFFIC_LIGHT_STATE_GREEN = 1
 TRAFFIC_LIGHT_STATE_RED = 2
 TRAFFIC_LIGHT_STATE_YELLOW = 3
+TRAFFIC_LIGHT_STATE_UNKNOWN = 4
 
 
 def load_graph(model_file):
@@ -93,7 +94,7 @@ class FrozenModel:
   def reduce_predictions(self, scores, classes):
       """Reduces predictions to one class."""
 
-      output_class = None
+      output_class = TRAFFIC_LIGHT_STATE_UNKNOWN
       for score, class_id in zip(scores, classes):
         if score > self.SCORE_THRESHOLD:
           # Return RED immediately if detected
