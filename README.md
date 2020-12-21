@@ -8,7 +8,7 @@ This is the project repo for the final project of the Udacity Self-Driving Car N
 |-----------------|-------------------------------|-|
 | Carlos Ezequiel | https://github.com/cfezequiel | |
 | Kyuhwan Yeon    | https://github.com/KyuhwanYeon | |
-| Santiago Hurtado| hurtadosanti@outlook.com | https://github.com/hurtadosanti |
+| Santiago Hurtado| https://github.com/hurtadosanti | hurtadosanti@outlook.com |
 
 Please use **one** of the two installation options, either native **or** docker installation.
 ### Native Installation
