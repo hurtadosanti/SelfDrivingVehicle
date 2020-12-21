@@ -1,9 +1,14 @@
 from styx_msgs.msg import TrafficLight
 
+import cv2
+
+import prediction
+
+
 class TLClassifier(object):
-    def __init__(self):
-        #TODO load classifier
-        pass
+
+    def __init__(self, model_file):
+        self.model = prediction.FrozenModel(model_file)
 
     def get_classification(self, image):
         """Determines the color of the traffic light in the image
@@ -15,5 +20,20 @@ class TLClassifier(object):
             int: ID of traffic light color (specified in styx_msgs/TrafficLight)
 
         """
-        #TODO implement light color prediction
-        return TrafficLight.UNKNOWN
+
+        image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        output_class = self.model.predict(image_rgb)
+        if output_class == prediction.TRAFFIC_LIGHT_STATE_RED:
+            ret = TrafficLight.RED
+
+        elif output_class == prediction.TRAFFIC_LIGHT_STATE_YELLOW:
+            ret = TrafficLight.YELLOW
+
+        elif output_class == prediction.TRAFFIC_LIGHT_STATE_GREEN:
+            ret = TrafficLight.GREEN
+
+        else:
+            ret = TrafficLight.UNKNOWN
+
+        return ret
+
