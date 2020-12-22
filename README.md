@@ -40,6 +40,21 @@ Run the docker file
 docker run -p 4567:4567 -v $PWD:/capstone -v /tmp/log:/root/.ros/ --rm -it capstone
 ```
 
+### Traffic light classifier models
+
+The traffic light state can be determined using a traffic light classifier, which makes use of TensorFlow models that can be downloaded from [here](). We reuse trained models developed by Justin Lee, et al. for their [previous CarND-Capstone project](https://github.com/justinlee007/CarND-Capstone/).
+
+Download the following models:
+- `frozen_inference_graph_sim_tf_v1.4.pb`
+- `frozen_inference_graph_real_tf_v1.4.pb`
+
+and place them in the following folder:
+`SelfDrivingVehicle/ros/src/tl_detector/light_classification/frozen_models`
+
+To enable use of the traffic light classifier models, make sure that the `use_model` flag is set to `True` in either the `tl_detector/sim_traffic_light_config.yaml` or `tl_detector/site_traffic_light_config.yaml`. If `use_model` flag is `False`, the traffic light detector will make use of the light state published on the`/vehicle/traffic_lights` topic for the closest detected traffic light. For the site or real simulation, the light state is not available, and the light state will be set to `UNKNOWN` if the `use_model` flag is `False`.
+
+If the `frozen_models` folder does not contain expected model file for the real or simulated track respectively, the behavior would be similar to setting `use_model`to `False`.
+
 ### Port Forwarding
 To set up port forwarding, please refer to the "uWebSocketIO Starter Guide" found in the classroom (see Extended Kalman Filter Project lesson).
 

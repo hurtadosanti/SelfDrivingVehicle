@@ -56,10 +56,15 @@ class TLDetector(object):
 
         self.bridge = CvBridge()
 
-        model_file = self.config['tensorflow_model']
         rospy.loginfo('Current directory: %s', os.getcwd())
-        rospy.loginfo('Using TensorFlow model: %s', model_file)
-        self.light_classifier = TLClassifier(model_file)
+        model_file = self.config['tensorflow_model']
+        self.use_model = self.config.get('use_model', True)
+        if os.path.exists(model_file) and self.use_model:
+            rospy.loginfo('Using TensorFlow model: %s', model_file)
+            self.light_classifier = TLClassifier(model_file)
+        else:
+            self.use_model = False
+
         self.listener = tf.TransformListener()
 
         self.state = TrafficLight.UNKNOWN
@@ -140,17 +145,15 @@ class TLDetector(object):
             int: ID of traffic light color (specified in styx_msgs/TrafficLight)
 
         """
-        if not self.has_image:
-            return light.state or TrafficLight.UNKNOWN
-
-        cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
-
-        #Get classification
-        classification = self.light_classifier.get_classification(cv_image)
+        if self.has_image and self.use_model:
+            cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
+            light_state = self.light_classifier.get_classification(cv_image)
+        else:
+            light_state = light.state or TrafficLight.UNKNOWN
         rospy.loginfo(
             'get_light_state(): Detected %s',
-            TRAFFIC_LIGHT_NAME_MAP[classification])
-        return classification
+            TRAFFIC_LIGHT_NAME_MAP[light_state])
+        return light_state
 
     def process_traffic_lights(self):
         """Finds closest visible traffic light, if one exists, and determines its
