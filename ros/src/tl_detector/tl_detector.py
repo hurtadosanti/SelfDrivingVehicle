@@ -145,11 +145,17 @@ class TLDetector(object):
             int: ID of traffic light color (specified in styx_msgs/TrafficLight)
 
         """
-        if self.has_image and self.use_model:
-            cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
-            light_state = self.light_classifier.get_classification(cv_image)
+        if self.has_image:
+            if self.use_model:
+                cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
+                light_state = self.light_classifier.get_classification(cv_image)
+            elif not self.config['is_site']:
+                light_state = light.state
+            else:
+                light_state = TrafficLight.UNKNOWN
         else:
-            light_state = light.state or TrafficLight.UNKNOWN
+            light_state = TrafficLight.UNKNOWN
+            
         rospy.loginfo(
             'get_light_state(): Detected %s',
             TRAFFIC_LIGHT_NAME_MAP[light_state])
