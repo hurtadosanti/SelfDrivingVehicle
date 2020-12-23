@@ -23,6 +23,8 @@ TRAFFIC_LIGHT_NAME_MAP = {
     TrafficLight.UNKNOWN: 'UNKNOWN',
 }
 
+CLASSIFY_EVERY_N_IMAGES = 4
+
 
 class TLDetector(object):
     def __init__(self):
@@ -35,6 +37,11 @@ class TLDetector(object):
         self.waypoint_tree = None
         self.camera_image = None
         self.lights = []
+        self.image_counter = 0
+        self.state = TrafficLight.UNKNOWN
+        self.last_state = TrafficLight.UNKNOWN
+        self.last_wp = -1
+        self.state_count = 0
 
         sub1 = rospy.Subscriber('/current_pose', PoseStamped, self.pose_cb)
         sub2 = rospy.Subscriber('/base_waypoints', Lane, self.waypoints_cb)
@@ -51,12 +58,15 @@ class TLDetector(object):
 
         config_string = rospy.get_param("/traffic_light_config")
         self.config = yaml.load(config_string)
+        self.is_site = self.config['is_site']
 
         self.upcoming_red_light_pub = rospy.Publisher('/traffic_waypoint', Int32, queue_size=1)
 
         self.bridge = CvBridge()
 
         rospy.loginfo('Current directory: %s', os.getcwd())
+
+        # Get classifier model
         model_file = self.config['tensorflow_model']
         self.use_model = self.config.get('use_model', True)
         if os.path.exists(model_file) and self.use_model:
@@ -67,10 +77,7 @@ class TLDetector(object):
 
         self.listener = tf.TransformListener()
 
-        self.state = TrafficLight.UNKNOWN
-        self.last_state = TrafficLight.UNKNOWN
-        self.last_wp = -1
-        self.state_count = 0
+
         rospy.spin()
 
     def pose_cb(self, msg):
@@ -111,6 +118,8 @@ class TLDetector(object):
         if self.state != state:  # state of the light has changed
             self.state_count = 0
             self.state = state
+            if state == TrafficLight.RED:
+                self.last_wp = light_wp
         elif self.state_count >= STATE_COUNT_THRESHOLD:
             self.last_state = self.state
             # We just care if the light is read, for now
@@ -119,6 +128,7 @@ class TLDetector(object):
             self.upcoming_red_light_pub.publish(Int32(light_wp))
         else:
             self.upcoming_red_light_pub.publish(Int32(self.last_wp))
+        rospy.logdebug('Publishing %s to /traffic_waypoint', self.last_wp)
         self.state_count += 1
 
     def get_closest_waypoint(self, x, y):
@@ -146,16 +156,20 @@ class TLDetector(object):
 
         """
         if self.has_image:
-            if self.use_model:
+            self.image_counter += 1
+            rospy.logdebug('image_counter: %s', self.image_counter)
+            if self.use_model and self.image_counter == CLASSIFY_EVERY_N_IMAGES:
+                rospy.logdebug('Run prediction.')
                 cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
                 light_state = self.light_classifier.get_classification(cv_image)
-            elif not self.config['is_site']:
+                self.image_counter = 0
+            elif not self.is_site:
                 light_state = light.state
             else:
                 light_state = TrafficLight.UNKNOWN
         else:
             light_state = TrafficLight.UNKNOWN
-            
+
         rospy.loginfo(
             'get_light_state(): Detected %s',
             TRAFFIC_LIGHT_NAME_MAP[light_state])

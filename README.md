@@ -42,7 +42,8 @@ docker run -p 4567:4567 -v $PWD:/capstone -v /tmp/log:/root/.ros/ --rm -it capst
 
 ### Traffic light classifier models
 
-The traffic light state can be determined using a traffic light classifier, which makes use of TensorFlow models that can be downloaded from [here](). We reuse trained models developed by Justin Lee, et al. for their [previous CarND-Capstone project](https://github.com/justinlee007/CarND-Capstone/).
+The traffic light state can be determined using a traffic light classifier, which makes use of TensorFlow models that can be downloaded from [here](https://drive.google.com/drive/folders/1kDGoZ02HkhLnar40DAGfSBonTTz7LKAg?usp=sharing). 
+We reuse trained models developed by Justin Lee, et al. for their [previous CarND-Capstone project](https://github.com/justinlee007/CarND-Capstone/).
 
 Download the following models:
 - `frozen_inference_graph_sim_tf_v1.4.pb`
