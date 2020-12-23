@@ -6,3 +6,5 @@ devel
 
 profile.tmp
 .vscode/settings.json
+
+.DS_Store

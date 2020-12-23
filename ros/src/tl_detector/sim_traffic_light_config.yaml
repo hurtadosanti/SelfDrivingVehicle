@@ -11,5 +11,6 @@ stop_line_positions:
     - [161.76, 2303.82]
     - [351.84, 1574.65]
 is_site: False
+use_model: False
 tensorflow_model: light_classification/frozen_models/frozen_inference_graph_sim_tf_v1.4.pb
 
