@@ -85,6 +85,11 @@ class FrozenModel:
     # Load model graph
     self.graph = load_graph(model_file)
 
+    # Load TF session
+    config = tf.ConfigProto()
+    config.gpu_options.allow_growth = True
+    self.sess = tf.Session(graph=self.graph, config=config)
+
     # Load input tensor
     self.input_tensor = self.load_input_tensor(self.graph)
 
@@ -118,8 +123,8 @@ class FrozenModel:
       """
 
       np_image = image_to_pred_input(image)
-      with tf.Session(graph=self.graph) as sess:
-        (scores, classes) = sess.run(
+      with self.graph.as_default():
+        (scores, classes) = self.sess.run(
             [
                 self.output_tensors['detection_scores'],
                 self.output_tensors['detection_classes'],
